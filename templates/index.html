@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Energy Prediction</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+
+        h1 {
+    text-align: center;
+    color: white;
+    font-size: 32px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+}
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .result {
+            text-align: center;
+            font-size: 18px;
+        }
+
+        canvas {
+            margin-top: 20px;
+        }
+body {
+    font-family: Arial;
+    background: url("{{ url_for('static', filename='bg.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 20px;
+}
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>⚡ Energy Consumption Predictor</h1>
+
+    <div class="card">
+        <input type="date" id="date">
+        <input type="time" id="time">
+
+    <div class="card">
+
+    <label>Temperature (°C)</label>
+    <input placeholder="e.g. 30" id="Temperature_C">
+
+    <label>Humidity (%)</label>
+    <input placeholder="e.g. 60" id="Humidity">
+
+    <label>Precipitation (mm)</label>
+    <input placeholder="e.g. 5" id="Precipitation">
+
+    <label>Wind Speed (m/s)</label>
+    <input placeholder="e.g. 3" id="Wind">
+
+    <label>Solar Radiation (W/m²)</label>
+    <input placeholder="e.g. 200" id="Solar">
+
+    </div>
+        <select id="model">
+            <option value="rf">Random Forest</option>
+            <option value="xgb">XGBoost</option>
+            <option value="arima">ARIMA</option>
+        </select>
+    
+        <button onclick="predict()">Predict</button>
+    </div>
+
+    <div class="card result">
+        <p id="prediction">Prediction: -</p>
+        <p id="accuracy">Accuracy: -</p>
+        <p id="best">Best Model: -</p>
+    </div>
+
+    <div class="card">
+        <canvas id="chart"></canvas>
+    </div>
+
+</div>
+
+<script>
+let chart;
+
+function predict() {
+    const data = {
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value,
+        Temperature_C: document.getElementById("Temperature_C").value,
+        Humidity: document.getElementById("Humidity").value,
+        Precipitation: document.getElementById("Precipitation").value,
+        Wind: document.getElementById("Wind").value,
+        Solar: document.getElementById("Solar").value,
+        model: document.getElementById("model").value
+    };
+
+    fetch('/predict_model', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+        document.getElementById("prediction").innerText = 
+    "Prediction: " + res.prediction + " Wh";
+        document.getElementById("accuracy").innerText = "Accuracy: " + res.accuracy;
+        document.getElementById("best").innerText = "Best Model: " + res.best_model;
+
+        drawChart(res.prediction);
+    });
+}
+
+function drawChart(value) {
+    const labels = [];
+    const data = [];
+
+    for (let i = 0; i < 24; i++) {
+        labels.push(i + "h");
+        data.push(value + (Math.random()*10 - 5)); // small variation
+    }
+
+    if (chart) chart.destroy();
+
+    const ctx = document.getElementById('chart');
+
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Next 24 Hours Prediction",
+                data: data,
+                borderWidth: 2,
+                fill: false
+            }]
+        }
+    });
+}
+</script>
+
+</body>
+</html>

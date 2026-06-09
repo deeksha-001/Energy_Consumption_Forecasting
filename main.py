@@ -109,7 +109,7 @@ with tab1:
 
     st.subheader("Dataset Statistics")
 
-    st.dataframe(df.describe())
+    st.dataframe(df.describe(include="all"))
 
     st.subheader("Missing Values")
 
@@ -221,19 +221,12 @@ with tab2:
         st.subheader("Forecast Data")
 
         forecast_df["Datetime"] = forecast_df["Datetime"].astype(str)
+        
         display_forecast = forecast_df.copy()
-
-        display_forecast["Datetime"] = (
-            display_forecast["Datetime"]
-            .dt.strftime("%Y-%m-%d %H:%M")
-        )
-
+        display_forecast["Datetime"] = display_forecast["Datetime"].astype(str)
         st.dataframe(display_forecast)
 
-        csv = forecast_df.to_csv(
-            index=False
-        ).encode("utf-8")
-
+        csv = forecast_df.to_csv(index=False).encode("utf-8")
         st.download_button(
             "📥 Download Forecast CSV",
             csv,

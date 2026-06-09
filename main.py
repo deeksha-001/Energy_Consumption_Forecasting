@@ -98,7 +98,14 @@ with tab1:
 
     st.subheader("Dataset Preview")
 
-    st.dataframe(df.head(20))
+    preview_df = df.head(20).copy()
+
+    preview_df["Datetime"] = (
+    pd.to_datetime(preview_df["Datetime"])
+    .dt.strftime("%Y-%m-%d %H:%M")
+    )
+
+    st.dataframe(preview_df)
 
     st.subheader("Dataset Statistics")
 
@@ -214,7 +221,14 @@ with tab2:
         st.subheader("Forecast Data")
 
         forecast_df["Datetime"] = forecast_df["Datetime"].astype(str)
-        st.dataframe(forecast_df)
+        display_forecast = forecast_df.copy()
+
+        display_forecast["Datetime"] = (
+            display_forecast["Datetime"]
+            .dt.strftime("%Y-%m-%d %H:%M")
+        )
+
+        st.dataframe(display_forecast)
 
         csv = forecast_df.to_csv(
             index=False

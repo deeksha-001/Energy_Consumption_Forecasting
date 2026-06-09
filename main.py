@@ -109,7 +109,7 @@ with tab1:
 
     st.subheader("Dataset Statistics")
 
-    st.dataframe(df.describe(include="all"))
+    #st.dataframe(df.describe(include="all"))
 
     st.subheader("Missing Values")
 
